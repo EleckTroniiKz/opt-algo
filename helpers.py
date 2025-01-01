@@ -11,7 +11,7 @@ def generate_instances(n, min_width, max_width, min_height, max_height):
     max_height: A rectangle has to have a height that is smaller or equals max_height
     """
 
-    return [(random.randint(min_width, max_width), random.randint(min_height, max_height)) for _ in range(n)]
+    return [(random.randint(0, max_width - min_width), random.randint(0, max_height - min_height), random.randint(min_width, max_width), random.randint(min_height, max_height)) for _ in range(n)]
 
 def rectangle_fits_in_box(box, rect, L):
     """
