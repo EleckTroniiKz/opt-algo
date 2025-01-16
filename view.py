@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog
 import random
+import json
 
 from numpy import empty
 
@@ -10,10 +11,8 @@ class GUI:
         self.generate_instances = generate_instances
         self.greedy_algorithm = greedy_algorithm
         self.local_search = local_search
-        
         self.rectangles = []
         self.L = 0
-        
         self.setup_ui()
     
     def setup_ui(self):
@@ -88,6 +87,12 @@ class GUI:
         btn_run = tk.Button(frame_buttons, text="Algorithmus ausführen", command=self.run_algorithm)
         btn_run.grid(row=0, column=1, padx=5)
 
+        btn_import = tk.Button(frame_buttons, text="Import Rectangles", command=self.import_rectangles)
+        btn_import.grid(row=1, column=0, padx=5)
+
+        btn_export = tk.Button(frame_buttons, text="Export Rectangles", command=self.export_rectangles)
+        btn_export.grid(row=1, column=1, padx=5)
+
         # Display Status of Program and the canvas with the rectangles
         self.label_status = tk.Label(self.root, text="Status: Bereit")
         self.label_status.pack()
@@ -107,7 +112,7 @@ class GUI:
         # Configure the canvas to work with the vertical scrollbar
         self.canvas.configure(yscrollcommand=v_scrollbar.set)
         
-    # Chnages visibility for widgets based on the selected algorithm    
+    # Changes visibility for widgets based on the selected algorithm    
     def update_algorithm(self, *args):
         if self.algo_selector.get() == "Greedy":
             self.local_search_neighborhood_selector.grid_remove()
@@ -186,7 +191,6 @@ class GUI:
             )
         self.visualize_solution(solution)
 
-    
     def visualize_solution(self, solution):
         self.canvas.delete("all")
 
@@ -226,3 +230,61 @@ class GUI:
     def update_scrollregion(self):
         self.canvas.update_idletasks()
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        
+    def import_rectangles(self):
+        file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+        if file_path:
+            try:
+                with open(file_path, "r") as file:
+                    data = json.load(file)
+                    
+                    # Populate rectangles and box length
+                    self.rectangles = data.get("rectangles", [])
+                    self.L = data.get("box_length", 0)
+                    
+                    # Update input fields
+                    self.entry_num_rectangles.delete(0, tk.END)
+                    self.entry_num_rectangles.insert(0, data.get("num_rectangles", ""))
+                    
+                    self.entry_min_width.delete(0, tk.END)
+                    self.entry_min_width.insert(0, data.get("min_width", ""))
+                    
+                    self.entry_max_width.delete(0, tk.END)
+                    self.entry_max_width.insert(0, data.get("max_width", ""))
+                    
+                    self.entry_min_height.delete(0, tk.END)
+                    self.entry_min_height.insert(0, data.get("min_height", ""))
+                    
+                    self.entry_max_height.delete(0, tk.END)
+                    self.entry_max_height.insert(0, data.get("max_height", ""))
+                    
+                    self.entry_box_length.delete(0, tk.END)
+                    self.entry_box_length.insert(0, self.L)
+                    
+                    self.label_status.config(text="Rechtecke erfolgreich importiert!")
+            except Exception as e:
+                self.error_label.config(text=f"Fehler beim Importieren: {e}", fg="red")
+    
+    def export_rectangles(self):
+        default_filename = "rectangles.json"
+        file_path = filedialog.asksaveasfilename(
+            initialfile=default_filename,
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json")]
+        )
+        if file_path:
+            try:
+                with open(file_path, "w") as file:
+                    data = {
+                        "rectangles": self.rectangles,
+                        "box_length": self.L,
+                        "num_rectangles": len(self.rectangles),
+                        "min_width": self.entry_min_width.get(),
+                        "max_width": self.entry_max_width.get(),
+                        "min_height": self.entry_min_height.get(),
+                        "max_height": self.entry_max_height.get(),
+                    }
+                    json.dump(data, file)
+                    self.label_status.config(text="Rechtecke erfolgreich exportiert!")
+            except Exception as e:
+                self.error_label.config(text=f"Fehler beim Exportieren: {e}", fg="red")
