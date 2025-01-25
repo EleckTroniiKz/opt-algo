@@ -12,7 +12,11 @@ def main():
             "area": "area",  # Add appropriate strategy configurations if needed
             "aspect_ratio": "aspect_ratio"
         }
-        problem = RectanglePacker(rectangles, box_length, GeometryBasedStrategy())
+        if strategy_name == "area":
+            rectangles.sort(key=lambda x: x[0] * x[1], reverse=True)
+        else:
+            rectangles.sort(key=lambda x: x[0] / x[1], reverse=True)
+        problem = RectanglePacker(rectangles, box_length, GeometryBasedStrategy)
         greedy_solver = Greedy(problem, strategy_map[strategy_name])
         return greedy_solver.solve()
 
