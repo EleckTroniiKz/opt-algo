@@ -87,10 +87,10 @@ class GUI:
         btn_run = tk.Button(frame_buttons, text="Algorithmus ausführen", command=self.run_algorithm)
         btn_run.grid(row=0, column=1, padx=5)
 
-        btn_import = tk.Button(frame_buttons, text="Import Rectangles", command=self.import_rectangles)
+        btn_import = tk.Button(frame_buttons, text="Import Rechtecke", command=self.import_rectangles)
         btn_import.grid(row=1, column=0, padx=5)
 
-        btn_export = tk.Button(frame_buttons, text="Export Rectangles", command=self.export_rectangles)
+        btn_export = tk.Button(frame_buttons, text="Export Rechtecke", command=self.export_rectangles)
         btn_export.grid(row=1, column=1, padx=5)
 
         # Display Status of Program and the canvas with the rectangles
