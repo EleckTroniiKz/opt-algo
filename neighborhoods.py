@@ -53,8 +53,9 @@ class GeometryBasedStrategy(NeighborhoodStrategy):
 
 
 class RuleBasedStrategy(NeighborhoodStrategy):
-    def __init__(self, problem: OptimizationProblem):
+    def __init__(self, problem: OptimizationProblem, rule: str = "Absteigend nach Höhe"):
         self.problem = problem
+        self.rule = rule
 
     def generate_neighbor(self, solution: RecPac_Solution):
         if not solution.boxes:
@@ -67,8 +68,12 @@ class RuleBasedStrategy(NeighborhoodStrategy):
         rectangles = [rect for box in solution.boxes for rect in box.rectangles]
 
         if len(rectangles) > 1:
-            # Sort rectangles (smallest first)
-            rectangles = sorted(rectangles, key=lambda rect: rect.height, reverse=True)
+            if self.rule == "Absteigend nach Höhe":
+                rectangles = sorted(rectangles, key=lambda rect: rect.height, reverse=True)
+            elif self.rule == "Absteigend nach Breite":
+                rectangles = sorted(rectangles, key=lambda rect: rect.width, reverse=True)
+            elif self.rule == "Absteigend nach Fläche":
+                rectangles = sorted(rectangles, key=lambda rect: rect.height*rect.width, reverse=True)
 
             # Pick a small rectangle from the first half
             small_rectangles = rectangles[:len(rectangles) // 2]
