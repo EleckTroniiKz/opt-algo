@@ -7,10 +7,11 @@ from objects import Rectangle
 import json
 
 class GUI:
-    def __init__(self, root, greedy_algorithm, local_search):
+    def __init__(self, root, greedy_algorithm, local_search, backtracking):
         self.root = root
         self.greedy_algorithm = greedy_algorithm
         self.local_search = local_search
+        self.backtracking = backtracking
         self.current_solution = None
         
         self.instances: List[Rectangle] = []
@@ -56,7 +57,7 @@ class GUI:
         self.entry_box_length.grid(row=5, column=1)
 
         # Choose the selected algorithm
-        self.algo_selector = ttk.Combobox(frame_inputs, values=["Greedy", "Lokale Suche"])
+        self.algo_selector = ttk.Combobox(frame_inputs, values=["Greedy", "Lokale Suche", "Backtracking"])
         self.algo_selector.set("Greedy")
         self.algo_selector.grid(row=6, column=1)
 
@@ -163,6 +164,12 @@ class GUI:
             self.local_search_max_iterations.grid()
             self.local_search_max_iterations_label.grid()
             self.local_search_max_iterations_is_visible = True
+        elif self.algo_selector.get() == "Backtracking":
+            self.local_search_neighborhood_selector.grid_remove()
+            self.local_search_max_iterations.grid_remove()
+            self.local_search_max_iterations_label.grid_remove()
+            self.local_search_max_iterations_is_visible = False
+            self.greedy_strat.grid_remove()
 
     def validate_inputs(self):
         errors = []
@@ -231,6 +238,8 @@ class GUI:
                 self.local_search_neighborhood_selector.get(),
                 int(self.local_search_max_iterations.get())
             )
+        elif algorithm == "Backtracking":
+            solution = self.backtracking(self.instances, self.box_size)
         self.current_solution = solution
         self.visualize_solution(solution)
 

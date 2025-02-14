@@ -1,5 +1,5 @@
 import time
-
+import sys
 from neighborhoods import NeighborhoodStrategy
 from objects import RecPac_Solution
 from problem import OptimizationProblem
@@ -66,4 +66,56 @@ class SimmulatedAnnealing:
 
 
 class Backtracking:
-    pass
+    def __init__(self, problem: OptimizationProblem):
+        self.problem = problem
+        sys.setrecursionlimit(10**6)
+
+    def solve(self):
+        start_time = time.time()
+
+        # Initialize an empty solution
+        current_solution = RecPac_Solution()
+
+        # Start the backtracking process
+        result = self._backtrack(current_solution, 0)
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Laufzeit Backtracking: {elapsed_time:.6f} Sekunden")
+
+        return result
+
+    def solve(self):
+        start_time = time.time()
+
+        # Initialize an empty solution
+        current_solution = RecPac_Solution()
+
+        # Start the backtracking process
+        result = self._backtrack(current_solution, 0)
+
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Laufzeit Backtracking: {elapsed_time:.6f} Sekunden")
+
+        return result
+
+    def _backtrack(self, current_solution: RecPac_Solution, index: int):
+        # Wenn alle Rechtecke platziert sind, return
+        if index >= len(self.problem.rectangles):
+            return current_solution
+
+        # aktuelles Rechteck zum platzieren
+        rectangle = self.problem.rectangles[index]
+
+        # Platziere Rechteck in Lösung
+        new_solution = self.problem.add_to_solution(current_solution, rectangle)
+
+        if new_solution is not None:
+            # Wenn neue Lösung None ist, versuche rekursiv weiter
+            result = self._backtrack(new_solution, index + 1)
+            if result is not None:
+                return result
+
+        # If no valid placement is found even after rotation, backtrack
+        return None
