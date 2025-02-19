@@ -1,5 +1,6 @@
-import copy
 import random
+from rtree import index
+import copy
 import itertools
 
 from classes.base_classes import  OptimizationProblem, Solution, Neighborhood
@@ -91,13 +92,16 @@ class OverlapStrategy(Neighborhood):
         new_solution = copy.deepcopy(solution)
 
         for box in new_solution.boxes:
-            items_to_relocate = [item for item in box.items if not self.check_overlap(box, item)]
+            # Aktualisiere den räumlichen Index für das aktuelle Box
+            spatial_index = self.build_spatial_index(box)
+
+            items_to_relocate = [item for item in box.items if not self.check_overlap(box, spatial_index, item)]
             for item in items_to_relocate:
                 box.remove_rectangle(item)
 
             for item in items_to_relocate:
                 placed = False
-                for target_box in itertools.chain([box], new_solution.boxes):  # Prioritize current box
+                for target_box in itertools.chain([box], new_solution.boxes):
                     if placed:
                         break
                     x, y, rotated = self.problem.find_valid_assignment(target_box, item, self.overlap_percentage * 0.3)
@@ -117,9 +121,22 @@ class OverlapStrategy(Neighborhood):
         self.overlap_percentage = max(0.0, round(self.overlap_percentage - self.decay_rate, 6))
         return new_solution
 
-    def check_overlap(self, box: Box, rect: Rectangle):
+    def build_spatial_index(self, box: Box):
+        # Erstelle einen räumlichen Index und füge alle Rechtecke hinzu
+        idx = index.Index()
+        for i, rect in enumerate(box.items):
+            idx.insert(i, (rect.x, rect.y, rect.x + rect.width, rect.y + rect.height))
+        return idx
+
+    def check_overlap(self, box: Box, spatial_index, rect: Rectangle):
+        rect_bounds = (rect.x, rect.y, rect.x + rect.width, rect.y + rect.height)
         max_rect_area = rect.width * rect.height
-        for existing_rect in box.items:
+
+        # Finde potenzielle Überschneidungen
+        potential_overlaps = list(spatial_index.intersection(rect_bounds))
+
+        for i in potential_overlaps:
+            existing_rect = box.items[i]  # Jetzt ist 'box' korrekt übergeben und zugreifbar
             if existing_rect is rect:
                 continue
 

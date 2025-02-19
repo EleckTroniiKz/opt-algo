@@ -1,3 +1,4 @@
+import cProfile
 import math
 import random
 import time
@@ -11,7 +12,6 @@ class Greedy:
     def __init__(self, problem: OptimizationProblem, solution_type: type, strategy="largest_area_first"):
         self.problem = problem
         self.solution_type = solution_type
-        
         self.problem.items = classes.helpers.apply_greedy_strategy(self.problem.items, strategy)
 
     def solve(self):
@@ -46,15 +46,22 @@ class LocalSearch:
         best_value = best_solution.evaluate_solution()
         iteration = 0
 
+        profiler = cProfile.Profile()
+        profiler.enable()  # Profiling starten
+
         while iteration < self.max_iterations:
             neighbor = self.neighborhood.generate_neighbor(current_solution)
             neighbor_value = neighbor.evaluate_solution()
+
             if neighbor_value <= best_value:
                 current_solution = neighbor
                 best_solution = neighbor
                 best_value = neighbor_value
 
             iteration += 1
+
+        profiler.disable()  # Profiling stoppen
+        profiler.print_stats(sort="tottime")  # Ergebnisse ausgeben
 
         end_time = time.time()
         elapsed_time = end_time - start_time
@@ -109,7 +116,7 @@ class Backtracking:
     def __init__(self, problem: OptimizationProblem, solution_type: type):
         self.problem = problem
         self.solution_type = solution_type
-        sys.setrecursionlimit(10**6)
+        sys.setrecursionlimit(10 ** 6)
 
     def solve(self):
         start_time = time.time()
